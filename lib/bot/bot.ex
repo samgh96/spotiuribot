@@ -8,7 +8,7 @@ defmodule Spotiuribot.Bot do
 
   def getalbum(uri) do
     case HTTPotion.get("https://api.spotify.com/v1/albums/#{uri}").body |> Poison.decode do
-      {:ok, %{"artists" => [%{"name" => artistname} | _ ], "name" => albumname}} -> "Artist: #{artistname} \nAlbum: #{albumname}"
+      {:ok, %{"artists" => [%{"name" => artistname} | _ ], "name" => albumname}} -> "Artist: #{artistname} \nAlbum: #{albumname}\n\nURL: https://open.spotify.com/album/#{uri}"
       _ -> "Unknown URI: #{uri} ☹️"
     end
   end
@@ -17,7 +17,7 @@ defmodule Spotiuribot.Bot do
     case HTTPotion.get("https://api.spotify.com/v1/tracks/#{uri}").body |> Poison.decode do
       {:ok, %{"artists" => [%{"name" => artistname} | _ ],
 	      "album" => %{"name" => albumname},
-	       "name" => trackname}} -> "Artist: #{artistname} \nAlbum: #{albumname} \nTrack: #{trackname}"
+	       "name" => trackname}} -> "Artist: #{artistname} \nAlbum: #{albumname} \nTrack: #{trackname}\n\nURL: https://open.spotify.com/track/#{uri}"
       _ -> "Unknown URI: #{uri} ☹️"
     end
   end
