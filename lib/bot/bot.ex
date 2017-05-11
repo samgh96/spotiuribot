@@ -6,6 +6,13 @@ defmodule Spotiuribot.Bot do
   use Telex.Bot, name: @bot
   use Telex.Dsl
 
+  def urimatch(s) do
+    case Regex.run(~r{(spotify:track:[a-zA-Z0-9]*)|(spotify:album:[a-zA-Z0-9]*)}, s) do
+      nil -> nil
+      [h | _] -> h
+    end
+  end
+  
   def getalbum(uri) do
     case HTTPotion.get("https://api.spotify.com/v1/albums/#{uri}").body |> Poison.decode do
       {:ok, %{"artists" => [%{"name" => artistname} | _ ], "name" => albumname}} -> "Artist: #{artistname} \nAlbum: #{albumname}\n\nURL: https://open.spotify.com/album/#{uri}"
@@ -33,12 +40,11 @@ defmodule Spotiuribot.Bot do
   def handle({:command, "help", msg}, name, _) do
     answer msg, "Toma esta halluda!", bot: name
   end
-
+  
   def handle({_, _, %{text: t, message_id: mid} = msg}, name, _) do
-    case t do
+    case urimatch(t) do
       "spotify:" <> type -> answer msg, getdata(type), bot: name, reply_to_message_id: mid
       _ -> ""
     end
   end
-  
 end
