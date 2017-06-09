@@ -1,19 +1,13 @@
 # Spotiuribot
 
-**TODO: Add description**
+From a spotify uri send a beauty message :)
 
-## Installation
+## Run
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `spotiuribot` to your list of dependencies in `mix.exs`:
+Run this bot with this environment variables set:
 
-```elixir
-def deps do
-  [{:spotiuribot, "~> 0.1.0"}]
-end
-```
+- TOKEN: Telegram bot token
+- CLIENT_ID: Spotify client id
+- CLIENT_SECRET: Spotify client secret
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/spotiuribot](https://hexdocs.pm/spotiuribot).
-
+Or modify the config/config.exs and add the values directly

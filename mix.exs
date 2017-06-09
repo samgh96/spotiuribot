@@ -33,7 +33,8 @@ defmodule Spotiuribot.Mixfile do
   defp deps do
     [
       {:httpotion, "~> 3.0.2"},
-      {:telex, git: "https://github.com/rockneurotiko/telex.git", tag: "0.1.5"}
+      {:poison, "~> 2.1"},
+      {:telex, git: "https://github.com/rockneurotiko/telex.git", tag: "0.2.0-rc1"}
     ]
   end
 end
