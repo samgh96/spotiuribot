@@ -3,13 +3,14 @@ defmodule Spotiuribot do
   def start, do: start(1, 1)
 
   require Logger
-  
+
   def start(_, _) do
     import Supervisor.Spec
-    
+
     children = [
+      worker(Spotiauth, []),
       supervisor(Telex, []),
-      supervisor(Spotiuribot.Bot, [:updates, Application.get_env(:spotiuri_bot, :token)])
+      supervisor(Spotiuribot.Bot, [:updates, Config.get(:spotiuri_bot, :token)])
     ]
 
     opts = [strategy: :one_for_one, name: Spotiuribot]

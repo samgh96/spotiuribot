@@ -3,10 +3,16 @@ defmodule Spotiuribot.Bot do
 
   def bot(), do: @bot
 
-  use Telex.Bot, name: @bot
+  use Telex.Bot,
+    name: @bot,
+    middlewares: [Spotiauth]
   use Telex.Dsl
 
   require Logger
+
+  defp get_url(url, token) do
+    HTTPotion.get(url, [headers: ["Authorization": "Bearer #{token}"]])
+  end
 
   def urimatch(s) do
     case Regex.run(~r{spotify:(track|album):([a-zA-Z0-9]+)}, s) do
@@ -15,35 +21,17 @@ defmodule Spotiuribot.Bot do
     end
   end
 
-  def getalbum(uri) do
-    case HTTPotion.get("https://api.spotify.com/v1/albums/#{uri}").body |> Poison.decode do
-      {:ok, %{"artists" => [%{"name" => artistname} | _ ], "name" => albumname}} -> {:ok, "Artist: #{artistname} \nAlbum: #{albumname}", "https://open.spotify.com/album/#{uri}"}
-      _ -> {:error, "Unknown URI: #{uri}"}
-    end
-  end
-
-  def gettrack(uri) do
-    case HTTPotion.get("https://api.spotify.com/v1/tracks/#{uri}").body |> Poison.decode do
-      {:ok, %{"artists" => [%{"name" => artistname} | _ ],
-              "album" => %{"name" => albumname},
-               "name" => trackname}} -> {:ok, "Artist: #{artistname} \nAlbum: #{albumname} \nTrack: #{trackname}", "https://open.spotify.com/track/#{uri}"}
-      _ -> {:error, "Unknown URI: #{uri}"}
-    end
-  end
-
-  # def getdata("album", id), do: getalbum(id)
-  # def getdata("track", id), do: gettrack(id)
-  def getdata(x, id) when x == "album" or x == "track" do
+  def getdata(x, id, token) when x == "album" or x == "track" do
     uri = "https://api.spotify.com/v1/#{x}s/#{id}"
-    case HTTPotion.get(uri).body |> Poison.decode do
+    case get_url(uri, token).body |> Poison.decode do
       {:ok, %{"artists" => [%{"name" => artistname} | _ ], "album" => %{"name" => albumname}, "name" => trackname}} ->
-        {:ok, "Artist: #{artistname} \nAlbum: #{albumname} \nTrack: #{trackname}", "https://open.spotify.com/track/#{id}"}
+        {:ok, "🎤 Artist: #{artistname} \n💽 Album: #{albumname} \n📝 Track: #{trackname}", "https://open.spotify.com/track/#{id}"}
       {:ok, %{"artists" => [%{"name" => artistname} | _ ], "name" => albumname}} ->
-        {:ok, "Artist: #{artistname} \nAlbum: #{albumname}", "https://open.spotify.com/album/#{id}"}
+        {:ok, "🎤 Artist: #{artistname} \n💽 Album: #{albumname}", "https://open.spotify.com/album/#{id}"}
       _ -> {:error, "Unknown URI: #{id}"}
     end
   end
-  def getdata(_, _), do: "guat is dis"
+  def getdata(_, _, _), do: "guat is dis"
 
   def create_inline_button(row) do
     row
@@ -67,9 +55,9 @@ defmodule Spotiuribot.Bot do
     answer msg, "Toma esta halluda!", bot: name
   end
 
-  def handle({_, _, %{text: t, message_id: mid} = msg}, name, _) do
+  def handle({_, _, %{text: t, message_id: mid} = msg}, name, %{token: token}) do
     with {:ok, type, id} <- urimatch(t),
-         {:ok, text, url} <- getdata(type, id),
+         {:ok, text, url} <- getdata(type, id, token),
            markup <- generate_url_button(url) do
       answer msg, text, bot: name, reply_to_message_id: mid, reply_markup: markup
    # Uncomment for debug
