@@ -1,6 +1,8 @@
 defmodule Spotiauth do
   use GenServer
 
+  require Logger
+
   def start_link() do
     GenServer.start_link(__MODULE__, :ok, [name: :auth])
   end
@@ -29,9 +31,11 @@ defmodule Spotiauth do
     case HTTPotion.post("https://accounts.spotify.com/api/token", [body: "grant_type=client_credentials", headers: ["Authorization": auth, "Content-Type": "application/x-www-form-urlencoded"]]) do
       %HTTPotion.Response{status_code: 200, body: body} ->
         %{"access_token" => actok, "expires_in" => expin} = Poison.decode!(body)
-        Process.send_after(self(), :auth, expin - 30)
+        # One second before, ask for renew
+        Process.send_after(self(), :auth, (expin - 60) * 1000)
         {:noreply, %{token: actok}}
-      _ ->
+      e ->
+        Logger.error "ERROR! #{inspect e}"
         raise "Not auth!"
     end
   end
